@@ -1,0 +1,30 @@
+! Truss structure example
+! Example from "A first source in the finite element method"
+! by Daryl Logan.  5th Ed. Sec. 3.6 pg. 85
+
+! Node numbering is automatic, starting from 0
+N, 0.0, 0.0
+N, 0.0, 3.0
+N, 3.0, 3.0
+N, 3.0, 0.0
+
+ET, 1, SBar	
+R, 1, 1, 6e-4	
+MP, 1, E, 2e11	
+
+E, 1, 0, 1
+E, 1, 0, 2
+E, 1, 0, 3
+
+! Currently, user must know nodes are enumerated as they were generated
+D, 1, ALL, 0.0
+D, 2, ALL, 0.0
+D, 3, ALL, 0.0
+
+F, 0, Y, -50000
+
+SOLVE, 0, 0
+
+PRNSOL, U
+
+FINISH
