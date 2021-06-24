@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lib/list.h"
+#include "lib/geom.h"
 #include "lib/linalg.h"
 #include "model.h"
 #include "mesh.h"
@@ -8,22 +9,29 @@
 #include "bc_data.h"
 #include "stiffness.h"
 #include "solver.h"
+#include "shape.h"
 
 
-#define NSD 2
-
-
-static struct matrix* construct_COORDS(struct list* nodes, int IEN[],
-				       int nenodes){
-  struct matrix* COORDS = new_matrix(NSD, nenodes);
-  struct node* n;
-  int i;
-  for (i=0; i<nenodes; i++){
-    n = nodes->array[IEN[i]];
-    COORDS->array[0][i] = n->x;
-    COORDS->array[1][i] = n->y;
+static void precomputations(struct list* et_defs){
+  // Perform any computations that apply to all elements of the same type
+  // and store them in the type definition's solver data
+  int i, j, lib_id, integration;
+  struct et_def* et;
+  for (i=0; i<et_defs->nitems; i++){
+    et = et_defs->array[i];
+    lib_id = et->lib_id;
+    integration = et->opts[0];
+    if (integrated_element(lib_id)){
+      printf("Computing integration values\n");
+      et->sdata->nint_pts = get_nint_pts(lib_id, integration);
+      et->sdata->int_pts = get_int_pts(lib_id, integration);
+      et->sdata->int_wts = get_int_wts(lib_id, integration);
+      et->sdata->D = construct_D(et);
+      // List of shape function derivatives in natural coordinates for each
+      // integration point (e, n).  Stored in convenient array.
+      et->sdata->NDERNATs = construct_NDERNATs(et);
+    }
   }
-  return COORDS;
 }
 
 
@@ -78,17 +86,16 @@ static void construct_K(struct list* nodes, struct list* elements,
 			struct list* essential_bcs){
   struct element* e;
   struct et_def* et;
-  struct matrix *KE, *COORDS;
+  struct matrix *KE;
   int i;
   for (i=0; i<elements->nitems; i++){
     printf("Assembling stiffness matrix for element %d\n", i);
     e = elements->array[i];
     et = get_et_def(et_defs, e->et_id);
-    COORDS = construct_COORDS(nodes, e->IEN, et->nenodes);
-    KE = KE_matrix(et, COORDS);
+    KE = construct_KE(e, et, nodes);
     print_matrix(KE);
     assemble_KE(K, F, KE, ID, e->IEN, essential_bcs, et->nenodes, et->ndof);
-    free_matrix(KE), free_matrix(COORDS);
+    free_matrix(KE);
   }
 }
 
@@ -129,6 +136,7 @@ struct static_soln* dense_static_solver(struct model* running_model){
   struct matrix* K = new_matrix(running_model->free_dof,
 				running_model->free_dof);
   struct vector* F = new_vector(running_model->free_dof);
+  precomputations(running_model->et_defs);
   construct_ID(running_model->nodes, running_model->ndof,
 	       running_model->essential_bcs, ID);
   printf("ID Matrix\n"), print_matrix(ID);
@@ -141,5 +149,6 @@ struct static_soln* dense_static_solver(struct model* running_model){
   printf("Force vector:\n"), print_vector(F);
   gaussLSS(K, F);  // Reduces F to U
   free_matrix(K);
+  printf("Solution vector:\n"), print_vector(F);
   return new_static_soln(running_model->ndof, ID, F);
 }
