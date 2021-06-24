@@ -220,6 +220,8 @@ struct matrix* construct_KE(struct element* e, struct et_def* et,
     KE = Isoparametric_KE(et, COORDS, 1, Bi_thermal);
     cmmult(KE, t);
   }
+	
+  free_matrix(COORDS);
   
   return KE;
 }
