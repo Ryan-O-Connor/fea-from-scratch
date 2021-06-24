@@ -188,6 +188,7 @@ void free_model(struct model* running_model){
   free_list(running_model->essential_bcs);
   free_items(running_model->nodal_forces, free_nodal_force);
   free_list(running_model->nodal_forces);
-  free_static_soln(running_model->solution);
+  if (running_model->solution != NULL)
+    free_static_soln(running_model->solution);
   free(running_model);
 }
