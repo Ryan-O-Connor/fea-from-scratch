@@ -264,28 +264,40 @@ int execute(struct model* running_model, struct instruction* next_instruction){
 
   if (strcmp("N", command_code) == 0)
     return exec_new_node(running_model, argc, argv);
+  
   else if (strcmp("E", command_code) == 0)
     return exec_new_element(running_model, argc, argv);
+  
   else if (strcmp("ET", command_code) == 0)
     return exec_new_element_type(running_model, argc, argv);
+  
   else if (strcmp("KEYOPT", command_code) == 0)
     return exec_set_keyopt(running_model, argc, argv);
+  
   else if (strcmp("R", command_code) == 0)
     return exec_set_real_constant(running_model, argc, argv);
+  
   else if (strcmp("MP", command_code) == 0)
     return exec_set_matprop(running_model, argc, argv);
+  
   else if (strcmp("D", command_code) == 0)
     return exec_add_essential_bc(running_model, argc, argv);
+  
   else if (strcmp("F", command_code) == 0)
     return exec_add_nodal_force(running_model, argc, argv);
+  
   else if (strcmp("SOLVE", command_code) == 0)
     return exec_model_solve(running_model, argc, argv);
+  
   else if (strcmp("PRNSOL", command_code) == 0)
     return exec_print_nodal_soln(running_model, argc, argv);
+  
   else if (strcmp("PRMESH", command_code) == 0)
     return exec_print_mesh(running_model);
+  
   else if (strcmp("FINISH", command_code) == 0)
     return exec_free_model(running_model);
+  
   else{
     printf("Error: Invalid command: %s\n", command_code);
     return 1;

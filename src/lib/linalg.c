@@ -328,6 +328,7 @@ void forward_elimination(struct matrix* A, struct vector* b){
   double pivot, sub_pivot;
   for (i=0; i<n; i++){
     pivot = A->array[i][i];
+    assert(pivot != 0.0);
     for (j=i+1; j<n; j++){
       sub_pivot = A->array[j][i];
       for (k=i; k<n; k++)

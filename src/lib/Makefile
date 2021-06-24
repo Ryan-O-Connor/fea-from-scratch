@@ -3,16 +3,16 @@
 all: linalg.o list.o geom.o strfuncs.o
 
 linalg.o: linalg.c linalg.h
-	gcc -c linalg.c
+	gcc -c -g linalg.c
 
 list.o: list.c list.h
-	gcc -c list.c
+	gcc -c -g list.c
 
 geom.o: geom.c geom.h
-	gcc -c geom.c
+	gcc -c -g geom.c
 
 strfuncs.o: strfuncs.c strfuncs.h
-	gcc -c strfuncs.c
+	gcc -c -g strfuncs.c
 
 clean:
-	rm -f *.o
+	rm -f *.o *~

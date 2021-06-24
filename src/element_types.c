@@ -5,6 +5,7 @@
 
 #include "lib/list.h"
 #include "lib/geom.h"
+#include "lib/linalg.h"
 #include "element_types.h"
 
 #define MAXOPT 10
@@ -193,10 +194,34 @@ void print_et_def(struct et_def* et){
 }
 
 
+static void free_solver_data(struct solver_data* sdata){
+  if (sdata->int_wts != NULL)
+    free(sdata->int_wts);
+  
+  if (sdata->int_pts != NULL){
+    free_items(sdata->int_pts, free);
+    free_list(sdata->int_pts);
+  }
+  
+  if (sdata->NDERNATs != NULL){
+    int i;
+    for (i=0; i<sdata->NDERNATs->nitems; i++)
+      free_matrix(sdata->NDERNATs->array[i]);
+    free_list(sdata->NDERNATs);
+  }
+
+  
+  if (sdata->D != NULL)
+    free_matrix(sdata->D);
+  
+  free(sdata);
+}
+
+
 void free_et_def(void* et){
   struct et_def* ET = et;
   free(ET->mprops);
-  free(ET->sdata);
+  free_solver_data(ET->sdata);
   free(ET);
 }
 
